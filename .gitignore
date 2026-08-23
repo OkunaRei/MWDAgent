@@ -1,0 +1,27 @@
+# Local research materials and generated artifacts
+.DS_Store
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pdf
+*.docx
+*.xlsx
+*.zip
+outputs/
+tmp/
+
+# Python and notebook artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS/editor files
+.idea/
+.vscode/
+# Local source archive; public copies belong under module directories.
+/Reference/
