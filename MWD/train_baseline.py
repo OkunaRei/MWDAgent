@@ -11,7 +11,7 @@ from lightgbm import LGBMClassifier
 from sklearn.preprocessing import LabelEncoder
 
 from src.contract import feature_columns, load_dataset
-from src.evaluate import classification_metrics
+from src.evaluate import classification_metrics, slice_classification_metrics
 from src.sampling import rebalance_training_set
 
 
@@ -59,6 +59,13 @@ def main() -> None:
     predictions = model.predict(test[columns]).astype(int)
     probabilities = model.predict_proba(test[columns])
     metrics = classification_metrics(y_test, predictions, probabilities, list(encoder.classes_))
+    metrics["slices"] = slice_classification_metrics(
+        y_test,
+        predictions,
+        probabilities,
+        list(encoder.classes_),
+        test["transition_zone"].to_numpy(dtype=bool),
+    )
     metrics["metadata"] = {
         "seed": SEED,
         "train_rows": len(train),
