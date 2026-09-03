@@ -1,0 +1,287 @@
+{
+  "accuracy": 0.8488562091503268,
+  "balanced_accuracy": 0.8653349237628751,
+  "macro_f1": 0.8377022001513833,
+  "weighted_f1": 0.852414063520177,
+  "classification_report": {
+    "Amphibolittic_gneiss": {
+      "precision": 0.6358695652173914,
+      "recall": 0.8068965517241379,
+      "f1-score": 0.7112462006079028,
+      "support": 145.0
+    },
+    "Augen_gneiss": {
+      "precision": 0.5660377358490566,
+      "recall": 0.8823529411764706,
+      "f1-score": 0.6896551724137931,
+      "support": 34.0
+    },
+    "Blackshale": {
+      "precision": 0.7850467289719626,
+      "recall": 0.8076923076923077,
+      "f1-score": 0.7962085308056872,
+      "support": 104.0
+    },
+    "Drammensgranite": {
+      "precision": 1.0,
+      "recall": 0.96045197740113,
+      "f1-score": 0.9798270893371758,
+      "support": 177.0
+    },
+    "Elnes_lime_shale": {
+      "precision": 0.9722222222222222,
+      "recall": 0.8974358974358975,
+      "f1-score": 0.9333333333333333,
+      "support": 78.0
+    },
+    "Granittic_gneiss": {
+      "precision": 0.8963414634146342,
+      "recall": 0.7636363636363637,
+      "f1-score": 0.8246844319775596,
+      "support": 385.0
+    },
+    "Hagaberg_shale": {
+      "precision": 0.6875,
+      "recall": 0.7333333333333333,
+      "f1-score": 0.7096774193548387,
+      "support": 45.0
+    },
+    "Hornfels": {
+      "precision": 0.8913043478260869,
+      "recall": 1.0,
+      "f1-score": 0.9425287356321839,
+      "support": 41.0
+    },
+    "Huk_limestone": {
+      "precision": 0.8103448275862069,
+      "recall": 0.8392857142857143,
+      "f1-score": 0.8245614035087719,
+      "support": 56.0
+    },
+    "Rhomb_porphyry": {
+      "precision": 0.9683544303797469,
+      "recall": 0.9622641509433962,
+      "f1-score": 0.9652996845425867,
+      "support": 159.0
+    },
+    "accuracy": 0.8488562091503268,
+    "macro avg": {
+      "precision": 0.8213021321467309,
+      "recall": 0.8653349237628751,
+      "f1-score": 0.8377022001513833,
+      "support": 1224.0
+    },
+    "weighted avg": {
+      "precision": 0.8642521810232991,
+      "recall": 0.8488562091503268,
+      "f1-score": 0.852414063520177,
+      "support": 1224.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      117,
+      1,
+      0,
+      0,
+      0,
+      26,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      30,
+      0,
+      0,
+      0,
+      4,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      84,
+      0,
+      0,
+      0,
+      14,
+      0,
+      6,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      170,
+      0,
+      2,
+      0,
+      1,
+      0,
+      4
+    ],
+    [
+      0,
+      0,
+      5,
+      0,
+      70,
+      0,
+      0,
+      0,
+      3,
+      0
+    ],
+    [
+      67,
+      22,
+      0,
+      0,
+      0,
+      294,
+      0,
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      0,
+      9,
+      0,
+      1,
+      1,
+      33,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      41,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      7,
+      0,
+      1,
+      0,
+      1,
+      0,
+      47,
+      0
+    ],
+    [
+      0,
+      0,
+      2,
+      0,
+      0,
+      1,
+      0,
+      3,
+      0,
+      153
+    ]
+  ],
+  "roc_auc_ovr": 0.9872563456454065,
+  "metadata": {
+    "seed": 42,
+    "train_rows": 3671,
+    "test_rows": 1224,
+    "balanced_train_rows": 5310,
+    "feature_count": 48,
+    "features": [
+      "PenetrNormMean",
+      "PenetrNormMedian",
+      "PenetrNormVariance",
+      "PenetrNormStandardDeviation",
+      "PenetrNormSkewness",
+      "PenetrNormKurtosis",
+      "PenetrRMSMean",
+      "PenetrRMSMedian",
+      "PenetrRMSVariance",
+      "PenetrRMSStandardDeviation",
+      "PenetrRMSSkewness",
+      "PenetrRMSKurtosis",
+      "RotaPressNormMean",
+      "RotaPressNormMedian",
+      "RotaPressNormVariance",
+      "RotaPressNormStandardDeviation",
+      "RotaPressNormSkewness",
+      "RotaPressNormKurtosis",
+      "RotaPressRMSMean",
+      "RotaPressRMSMedian",
+      "RotaPressRMSVariance",
+      "RotaPressRMSStandardDeviation",
+      "RotaPressRMSSkewness",
+      "RotaPressRMSKurtosis",
+      "FeedPressNormMean",
+      "FeedPressNormMedian",
+      "FeedPressNormVariance",
+      "FeedPressNormStandardDeviation",
+      "FeedPressNormSkewness",
+      "FeedPressNormKurtosis",
+      "HammerPressNormMean",
+      "HammerPressNormMedian",
+      "HammerPressNormVariance",
+      "HammerPressNormStandardDeviation",
+      "HammerPressNormSkewness",
+      "HammerPressNormKurtosis",
+      "WaterFlowNormMean",
+      "WaterFlowNormMedian",
+      "WaterFlowNormVariance",
+      "WaterFlowNormStandardDeviation",
+      "WaterFlowNormSkewness",
+      "WaterFlowNormKurtosis",
+      "WaterFlowRMSMean",
+      "WaterFlowRMSMedian",
+      "WaterFlowRMSVariance",
+      "WaterFlowRMSStandardDeviation",
+      "WaterFlowRMSSkewness",
+      "WaterFlowRMSKurtosis"
+    ],
+    "classes": [
+      "Amphibolittic_gneiss",
+      "Augen_gneiss",
+      "Blackshale",
+      "Drammensgranite",
+      "Elnes_lime_shale",
+      "Granittic_gneiss",
+      "Hagaberg_shale",
+      "Hornfels",
+      "Huk_limestone",
+      "Rhomb_porphyry"
+    ],
+    "sampling": "second-largest-class undersampling followed by SMOTE",
+    "paper_params": {
+      "boosting_type": "dart",
+      "colsample_bytree": 0.6563099142197473,
+      "learning_rate": 0.32031365887407864,
+      "max_depth": 49,
+      "min_child_samples": 49,
+      "min_child_weight": 2.9301413598309467e-05,
+      "n_estimators": 130,
+      "num_leaves": 236,
+      "reg_alpha": 0.020733894378166445,
+      "reg_lambda": 2.584873506220451e-05,
+      "subsample": 0.7813241713152921
+    }
+  }
+}

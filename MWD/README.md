@@ -55,6 +55,34 @@ docs/
 
 本地验证文件哈希和数据版本见 `docs/data-provenance/mwd_rocktype_10358374.md`。
 
+## 论文基线复现
+
+当前实现复现 Hansen et al. (2024) 的十类 `Rock` 预测主流程：48 个 MWD 统计特征、公开固定训练/测试划分、训练集欠采样到第二大类后使用 SMOTE、LightGBM `dart` 参数。
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install --only-binary=:all: -r requirements.txt
+.venv/bin/python -m pytest -q
+.venv/bin/python train_baseline.py
+.venv/bin/python evaluate_slices.py
+```
+
+输出位置：
+
+```text
+reports/baseline/metrics.json
+reports/baseline/classification_report.csv
+reports/baseline/confusion_matrix.png
+reports/slices/metrics.json
+reports/slices/slice_summary.csv
+```
+
+首轮运行结果与解释见 [`docs/research-plan/hansen2024-baseline-reproduction.md`](docs/research-plan/hansen2024-baseline-reproduction.md)。
+
+## 论文方向
+
+本模块拟研究“知识约束 Agent 优化 MWD 地层识别模型”，而不是让大语言模型直接预测地层或注浆参数。Agent 负责数据审计、特征和模型选择、错误诊断、约束检查和实验编排；专业模型负责数值预测。完整论文思路见 [`docs/research-plan/agent-optimized-mwd-paper-idea.md`](docs/research-plan/agent-optimized-mwd-paper-idea.md)。
+
 ## 对齐总方案的后续阶段
 
 - `随钻感知 Agent`：时间同步、深度对齐、工况识别、区段划分和质量门控；
