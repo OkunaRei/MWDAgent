@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -20,21 +21,16 @@ def classification_metrics(
     class_names: list[str],
 ) -> dict[str, Any]:
     class_indices = np.arange(len(class_names))
-    result: dict[str, Any] = {
-        "accuracy": float(accuracy_score(labels, predictions)),
-        "balanced_accuracy": float(balanced_accuracy_score(labels, predictions)),
-        "macro_f1": float(f1_score(labels, predictions, average="macro")),
-        "weighted_f1": float(f1_score(labels, predictions, average="weighted")),
-        "classification_report": classification_report(
-            labels,
-            predictions,
-            labels=class_indices,
-            target_names=class_names,
-            output_dict=True,
-            zero_division=0,
-        ),
-        "confusion_matrix": confusion_matrix(labels, predictions, labels=class_indices).tolist(),
-    }
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="y_pred contains classes not in y_true")
+        result: dict[str, Any] = {
+            "accuracy": float(accuracy_score(labels, predictions)),
+            "balanced_accuracy": float(balanced_accuracy_score(labels, predictions)),
+            "macro_f1": float(f1_score(labels, predictions, average="macro")),
+            "weighted_f1": float(f1_score(labels, predictions, average="weighted")),
+            "classification_report": _classification_report(labels, predictions, class_indices, class_names),
+            "confusion_matrix": confusion_matrix(labels, predictions, labels=class_indices).tolist(),
+        }
     if np.unique(labels).size < len(class_names):
         result["roc_auc_ovr"] = None
     else:
@@ -44,6 +40,24 @@ def classification_metrics(
         except ValueError:
             result["roc_auc_ovr"] = None
     return result
+
+
+def _classification_report(
+    labels: np.ndarray,
+    predictions: np.ndarray,
+    class_indices: np.ndarray,
+    class_names: list[str],
+) -> dict[str, Any]:
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="y_pred contains classes not in y_true")
+        return classification_report(
+            labels,
+            predictions,
+            labels=class_indices,
+            target_names=class_names,
+            output_dict=True,
+            zero_division=0,
+        )
 
 
 def slice_classification_metrics(

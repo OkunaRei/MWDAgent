@@ -65,6 +65,7 @@ python3 -m venv .venv
 .venv/bin/python -m pytest -q
 .venv/bin/python train_baseline.py
 .venv/bin/python evaluate_slices.py
+.venv/bin/python run_benchmark.py
 ```
 
 输出位置：
@@ -75,9 +76,38 @@ reports/baseline/classification_report.csv
 reports/baseline/confusion_matrix.png
 reports/slices/metrics.json
 reports/slices/slice_summary.csv
+reports/benchmark/benchmark.json
+reports/benchmark/validation_summary.csv
+reports/benchmark/optimization_log.jsonl
 ```
 
 首轮运行结果与解释见 [`docs/research-plan/hansen2024-baseline-reproduction.md`](docs/research-plan/hansen2024-baseline-reproduction.md)。
+
+## Agent 接入前基准平台
+
+在接入 LLM Agent 前，使用 `run_benchmark.py` 固定模型选择和评估协议：公开训练集内部按种子划分训练/验证集，使用验证集平均分选择模型，公开测试集只在最后用预注册的 `seed=42` 评估一次。
+
+```bash
+.venv/bin/python run_benchmark.py
+```
+
+输出位置：
+
+```text
+reports/benchmark/benchmark.json
+reports/benchmark/validation_summary.csv
+reports/benchmark/optimization_log.jsonl
+```
+
+综合选择分数为：
+
+```text
+0.2 × Balanced Accuracy
++ 0.5 × Macro-F1
++ 0.3 × transition_zone Macro-F1
+```
+
+详细协议和首轮结果见 [`docs/research-plan/pre-agent-benchmark.md`](docs/research-plan/pre-agent-benchmark.md)。后续 Agent 只能提出候选配置并读取验证结果，不能使用公开测试集反馈调参。
 
 ## 论文方向
 
