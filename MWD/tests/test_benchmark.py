@@ -8,7 +8,10 @@ import pytest
 
 from src.benchmark import (
     compute_selection_score,
+    candidate_key,
     choose_test_seed,
+    feature_group_columns,
+    select_candidate,
     select_model,
     split_train_validation,
     summarize_validation_runs,
@@ -95,3 +98,37 @@ def test_model_selection_uses_validation_mean_and_test_seed_is_fixed() -> None:
 def test_choose_test_seed_rejects_unlisted_reference_seed() -> None:
     with pytest.raises(ValueError, match="reference_seed"):
         choose_test_seed([11, 19], reference_seed=42)
+
+
+def test_feature_groups_are_subsets_of_the_public_mwd_features() -> None:
+    feature_names = [f"feature_{i}" for i in range(48)]
+    feature_names[0] = "PenetrNormMean"
+    feature_names[1] = "RotaPressNormMean"
+    feature_names[2] = "FeedPressNormMean"
+    feature_names[3] = "HammerPressNormMean"
+    feature_names[4] = "WaterFlowNormMean"
+    frame = pd.DataFrame({name: [1.0] for name in feature_names})
+    frame["Rock"] = "A"
+    frame["transition_zone"] = False
+    frame["Tunnel"] = "T1"
+    frame["PegStart"] = 0.0
+    frame["PegEnd"] = 1.0
+    frame["round_length"] = 1.0
+
+    assert feature_group_columns(frame, "all_48") == feature_names
+    assert feature_group_columns(frame, "water_flow") == ["WaterFlowNormMean"]
+
+
+def test_select_candidate_uses_validation_average_score() -> None:
+    summary = {
+        "all_48__lightgbm": {"selection_score_mean": 0.70},
+        "water_flow__extratrees": {"selection_score_mean": 0.72},
+    }
+
+    assert select_candidate(summary) == "water_flow__extratrees"
+
+
+def test_candidate_key_is_stable_and_rejects_unknown_options() -> None:
+    assert candidate_key("water_flow", "extratrees") == "water_flow__extratrees"
+    with pytest.raises(ValueError, match="Unsupported feature group"):
+        candidate_key("unknown", "extratrees")

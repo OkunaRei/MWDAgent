@@ -32,6 +32,18 @@ PAPER_PARAMS = {
     "subsample": 0.7813241713152921,
 }
 
+FEATURE_GROUPS = {
+    "all_48": lambda column: True,
+    "penetration": lambda column: column.startswith("Penetr"),
+    "rotation_pressure": lambda column: column.startswith("RotaPress"),
+    "feed_hammer_pressure": lambda column: column.startswith(("FeedPress", "HammerPress")),
+    "water_flow": lambda column: column.startswith("WaterFlow"),
+    "central_statistics": lambda column: column.endswith(("Mean", "Median")),
+    "variability_statistics": lambda column: column.endswith(
+        ("Variance", "StandardDeviation", "Skewness", "Kurtosis")
+    ),
+}
+
 
 def split_train_validation(
     frame: pd.DataFrame,
@@ -73,6 +85,17 @@ def compute_selection_score(
     )
 
 
+def feature_group_columns(frame: pd.DataFrame, feature_group: str) -> list[str]:
+    """Return an allowed subset of the public MWD features."""
+    if feature_group not in FEATURE_GROUPS:
+        raise ValueError(f"Unsupported feature group: {feature_group}")
+    columns = feature_columns(frame)
+    selected = [column for column in columns if FEATURE_GROUPS[feature_group](column)]
+    if not selected:
+        raise ValueError(f"Feature group has no columns: {feature_group}")
+    return selected
+
+
 def select_model(summary: dict[str, dict[str, float | int]]) -> str:
     """Select a model from validation aggregates only."""
     if not summary:
@@ -80,6 +103,20 @@ def select_model(summary: dict[str, dict[str, float | int]]) -> str:
     if any("selection_score_mean" not in metrics for metrics in summary.values()):
         raise ValueError("Every model must have a selection_score_mean")
     return max(summary, key=lambda name: summary[name]["selection_score_mean"])
+
+
+def select_candidate(summary: dict[str, dict[str, float | int]]) -> str:
+    """Select a feature/model candidate from validation aggregates only."""
+    return select_model(summary)
+
+
+def candidate_key(feature_group: str, model_name: str) -> str:
+    """Build a stable key for optimization logs."""
+    if feature_group not in FEATURE_GROUPS:
+        raise ValueError(f"Unsupported feature group: {feature_group}")
+    if model_name not in {"lightgbm", "extratrees"}:
+        raise ValueError(f"Unsupported benchmark model: {model_name}")
+    return f"{feature_group}__{model_name}"
 
 
 def choose_test_seed(seeds: Iterable[int], *, reference_seed: int) -> int:
@@ -105,6 +142,19 @@ def _make_model(model_name: str, seed: int) -> Any:
             random_state=seed,
             n_jobs=1,
             class_weight=None,
+        )
+    if model_name == "lightgbm_small":
+        return LGBMClassifier(
+            objective="multiclass",
+            boosting_type="gbdt",
+            n_estimators=100,
+            learning_rate=0.08,
+            num_leaves=63,
+            max_depth=12,
+            min_child_samples=20,
+            random_state=seed,
+            verbosity=-1,
+            n_jobs=1,
         )
     raise ValueError(f"Unsupported benchmark model: {model_name}")
 
@@ -133,10 +183,11 @@ def run_validation_once(
     validation_size: float,
     seed: int,
     selection_weights: tuple[float, float, float] = (0.2, 0.5, 0.3),
+    feature_group: str = "all_48",
 ) -> dict[str, Any]:
     """Train and evaluate one model using only a split of the public train file."""
     train, validation = split_train_validation(train_frame, validation_size=validation_size, seed=seed)
-    columns = feature_columns(train)
+    columns = feature_group_columns(train, feature_group)
     y_train, y_validation, encoder = _encode_labels(train, validation)
     balanced_features, balanced_labels = rebalance_training_set(
         train[columns], y_train, random_state=seed
@@ -156,6 +207,7 @@ def run_validation_once(
     )
     result = {
         "model": model_name,
+        "feature_group": feature_group,
         "seed": seed,
         "validation_size": validation_size,
         "train_rows": len(train),
@@ -210,6 +262,18 @@ def summarize_validation_runs(runs: Iterable[dict[str, Any]]) -> dict[str, dict[
             summary[model_name]["selection_score_mean"] = float(array.mean())
             summary[model_name]["selection_score_std"] = float(array.std(ddof=0))
     return summary
+
+
+def summarize_candidate_runs(runs: Iterable[dict[str, Any]]) -> dict[str, dict[str, float | int]]:
+    """Summarize validation runs by feature-group/model candidate."""
+    run_list = list(runs)
+    return summarize_validation_runs(
+        {
+            **run,
+            "model": candidate_key(run["feature_group"], run["model"]),
+        }
+        for run in run_list
+    )
 
 
 def write_jsonl(path: str | Path, records: Iterable[dict[str, Any]]) -> None:

@@ -66,6 +66,7 @@ python3 -m venv .venv
 .venv/bin/python train_baseline.py
 .venv/bin/python evaluate_slices.py
 .venv/bin/python run_benchmark.py
+.venv/bin/python optimize_baseline.py
 ```
 
 输出位置：
@@ -79,6 +80,9 @@ reports/slices/slice_summary.csv
 reports/benchmark/benchmark.json
 reports/benchmark/validation_summary.csv
 reports/benchmark/optimization_log.jsonl
+reports/optimizer/optimizer.json
+reports/optimizer/candidate_summary.csv
+reports/optimizer/optimization_log.jsonl
 ```
 
 首轮运行结果与解释见 [`docs/research-plan/hansen2024-baseline-reproduction.md`](docs/research-plan/hansen2024-baseline-reproduction.md)。
@@ -108,6 +112,8 @@ reports/benchmark/optimization_log.jsonl
 ```
 
 详细协议和首轮结果见 [`docs/research-plan/pre-agent-benchmark.md`](docs/research-plan/pre-agent-benchmark.md)。后续 Agent 只能提出候选配置并读取验证结果，不能使用公开测试集反馈调参。
+
+有限搜索结果见 [`docs/research-plan/baseline-optimizer-results.md`](docs/research-plan/baseline-optimizer-results.md)。当前结果显示，5 个特征组与 2 个模型的搜索仍选择完整 48 特征 + LightGBM；下一轮应优先研究过渡区错误、质量门控和概率校准，而不是继续盲目删减特征。
 
 ## 论文方向
 

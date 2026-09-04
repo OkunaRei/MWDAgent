@@ -10,6 +10,11 @@ evaluation:
   primary_metric: selection_score
   test_policy: "Only evaluate the selected configuration after validation is complete"
 
+optimization:
+  seeds: [11, 42, 73]
+  feature_groups: [all_48, penetration, rotation_pressure, feed_hammer_pressure, water_flow]
+  models: [lightgbm, extratrees]
+
 selection_score:
   balanced_accuracy_weight: 0.2
   macro_f1_weight: 0.5
