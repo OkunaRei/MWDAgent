@@ -2,6 +2,8 @@
 
 面向地下工程的随钻感知（MWD）地层识别与注浆决策研究模块。
 
+项目执行顺序与阶段验收见[总体路线](../docs/project-roadmap.md)，自有数据准备见[现场数据契约](../docs/field-data-contract.md)。公开数据用于先行验证方法，后续接入自有数据完成工程验证；当前分类模型的权重、标签和阈值不默认直接迁移。
+
 本模块服从总项目《地下空间工程钻注一体化地质认知与注浆决策智能体研究方案》。完整的研究目标不是单独做一个 MWD 分类器，而是构建“随钻感知—地质认知—注浆方案生成—施工反馈修正”的人在回路闭环。总方案对齐说明见 [`docs/research-plan/project-plan-alignment.md`](docs/research-plan/project-plan-alignment.md)。
 
 当前阶段聚焦于总方案第一阶段的可公开复现实验：
@@ -12,19 +14,21 @@ MWD 钻进响应 -> 数据质量与地层状态识别 -> 不确定性输出 -> �
 
 ## 当前复现对象
 
-首个公开数据复现实验采用 Hansen & Aarset (2024)：
+当前已实现的监督分类基线采用 Hansen, Liu & Torresen (2024)：
 
-> Unsupervised Machine Learning for Data-Driven Rock Mass Classification: Addressing Limitations in Existing Systems Using Drilling Data
+> Predicting rock type from MWD tunnel data using a reproducible ML-modelling process
 
-- DOI: <https://doi.org/10.1007/s00603-024-04280-z>
+- DOI: <https://doi.org/10.1016/j.tust.2024.105843>
 - 公开数据：<https://doi.org/10.5281/zenodo.10358374>
-- 数据内容：15 条挪威硬岩隧道、MWD 特征、岩性标签、Q 值/Q-class 等
+- 当前分类 CSV：15 条挪威硬岩隧道、48 个 MWD 汇总特征、岩性、位置和过渡区等字段；不是单孔原始连续时序。
+
+Hansen & Aarset 的[无监督岩体分类研究](https://doi.org/10.1007/s00603-024-04280-z)作为相关研究保留，其研究目标与当前已实现的岩性监督分类基线区分。
 
 公开数据阶段复现：
 
-1. 使用 MWD 特征复现岩性和过渡区识别；
+1. 使用 MWD 特征复现岩性预测，并按过渡区做离线评价；
 2. 使用 LightGBM、ExtraTrees 等模型建立有监督基线；
-3. 增加按隧道留出的泛化验证；
+3. 保留论文固定划分，新增空间区块隔离诊断；按隧道留出前先处理缺类与未知类别问题；
 4. 增加数据质量评分和概率校准接口；
 5. 为后续富水破碎带识别和注浆决策提供数据契约。
 
@@ -81,7 +85,7 @@ reports/slices/slice_summary.csv
 
 ## 论文方向
 
-本模块拟研究“知识约束 Agent 优化 MWD 地层识别模型”，而不是让大语言模型直接预测地层或注浆参数。Agent 负责数据审计、特征和模型选择、错误诊断、约束检查和实验编排；专业模型负责数值预测。完整论文思路见 [`docs/research-plan/agent-optimized-mwd-paper-idea.md`](docs/research-plan/agent-optimized-mwd-paper-idea.md)。
+近期研究主线是空间相关条件下的地质识别可靠性，以及质量、校准和拒识对后续决策的价值。Agent 负责数据审计、错误诊断、约束检查和条件编排，其相对固定工作流或普通搜索的收益需要独立验证。既有[模型优化 Agent 论文思路](docs/research-plan/agent-optimized-mwd-paper-idea.md)保留为候选分支，具体优先级和贡献成立条件以[总体路线](../docs/project-roadmap.md)为准。
 
 ## 对齐总方案的后续阶段
 
