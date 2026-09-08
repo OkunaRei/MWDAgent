@@ -1,0 +1,21 @@
+dataset:
+  train: data/mwd_rocktype_10358374/mwd_rocktype_blastholes_model_ready_train.csv
+  test: data/mwd_rocktype_10358374/mwd_rocktype_blastholes_model_ready_test.csv
+  validation_size: 0.2
+
+evaluation:
+  seeds: [11, 19, 42, 73, 101]
+  reference_test_seed: 42
+  models: [lightgbm, extratrees]
+  primary_metric: selection_score
+  test_policy: "Only evaluate the selected configuration after validation is complete"
+
+optimization:
+  seeds: [11, 42, 73]
+  feature_groups: [all_48, penetration, rotation_pressure, feed_hammer_pressure, water_flow]
+  models: [lightgbm, extratrees]
+
+selection_score:
+  balanced_accuracy_weight: 0.2
+  macro_f1_weight: 0.5
+  transition_macro_f1_weight: 0.3
