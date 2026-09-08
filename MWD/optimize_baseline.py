@@ -69,9 +69,12 @@ def evaluate_candidate_test(
         "balanced_accuracy": overall["balanced_accuracy"],
         "macro_f1": overall["macro_f1"],
         "weighted_f1": overall["weighted_f1"],
+        "expected_calibration_error": overall["expected_calibration_error"],
         "roc_auc_ovr": overall["roc_auc_ovr"],
         "ordinary_macro_f1": slices["ordinary"]["macro_f1"],
+        "ordinary_expected_calibration_error": slices["ordinary"]["expected_calibration_error"],
         "transition_macro_f1": slices["transition_zone"]["macro_f1"],
+        "transition_expected_calibration_error": slices["transition_zone"]["expected_calibration_error"],
         "transition_support": slices["transition_zone"]["support"],
         "validation_not_used": True,
     }

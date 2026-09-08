@@ -68,16 +68,19 @@ def evaluate_selected_configuration(
             "balanced_accuracy": overall["balanced_accuracy"],
             "macro_f1": overall["macro_f1"],
             "weighted_f1": overall["weighted_f1"],
+            "expected_calibration_error": overall["expected_calibration_error"],
             "roc_auc_ovr": overall["roc_auc_ovr"],
         },
         "ordinary": {
             "support": slices["ordinary"]["support"],
             "macro_f1": slices["ordinary"]["macro_f1"],
+            "expected_calibration_error": slices["ordinary"]["expected_calibration_error"],
             "balanced_accuracy": slices["ordinary"]["balanced_accuracy"],
         },
         "transition_zone": {
             "support": slices["transition_zone"]["support"],
             "macro_f1": slices["transition_zone"]["macro_f1"],
+            "expected_calibration_error": slices["transition_zone"]["expected_calibration_error"],
             "balanced_accuracy": slices["transition_zone"]["balanced_accuracy"],
         },
     }

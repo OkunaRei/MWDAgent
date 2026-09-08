@@ -172,6 +172,7 @@ def _flat_metrics(metrics: dict[str, Any]) -> dict[str, float | int | None]:
         "balanced_accuracy": metrics["balanced_accuracy"],
         "macro_f1": metrics["macro_f1"],
         "weighted_f1": metrics["weighted_f1"],
+        "expected_calibration_error": metrics["expected_calibration_error"],
         "roc_auc_ovr": metrics["roc_auc_ovr"],
     }
 
