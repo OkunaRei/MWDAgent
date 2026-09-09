@@ -12,6 +12,8 @@ MWD 钻进响应 -> 数据质量与地层状态识别 -> 不确定性输出 -> �
 
 ## 当前核心入口：实验 Agent
 
+当前工作及尚未解决的研究问题见 [阶段性交付与研究难点](docs/research-plan/current-research-blockers.md)。本阶段未证明 Agent 的性能或搜索效率优势；默认基线保持 paper_smote。
+
 `run_mwd_agent.py` 提供语言模型宿主可调用的实验闭环：读取验证观察、提交结构化候选动作、执行五种子评估、检查过渡区约束、更新或保留配置、停止。宿主提出动作，执行器只运行白名单内的专业模型；不内置远端 LLM API。
 
 ```bash
@@ -25,6 +27,27 @@ MWD 钻进响应 -> 数据质量与地层状态识别 -> 不确定性输出 -> �
 首轮宿主闭环已完成三个模型提出的候选动作、四组配置共 20 次训练，预算耗尽后保留完整特征 LightGBM。提案、观察版本与评估证据保存在 `reports/agent_loop/2026-09-08/`；这证明执行闭环已贯通，尚未证明 Agent 优于普通搜索。
 
 同预算顺序回放已接入 `compare_agent_search.py --output-dir <新目录>`。它比较固定顺序、实际宿主顺序和全部六种随机顺序，复用既有结果、不重新训练。当前各预算点全部持平，完整目录中无可晋级候选；协议及结果见 [`docs/research-plan/search-comparison.md`](docs/research-plan/search-comparison.md)。
+
+新增六候选训练策略研究与 Agent 入口：
+
+```bash
+.venv/bin/python run_sampling_study.py --output-dir reports/training_strategies/new-run
+.venv/bin/python run_mwd_agent.py init --strategy-actions --budget 3 --session reports/agent_loop/new-strategy-session
+```
+
+LightGBM + balanced 类别权重在五种子验证中将综合分数提高到 0.7554、过渡区 Macro-F1 提高到 0.5936，并在独立创建的 Agent 会话中完成晋级。结果不代表独立搜索效率证据，逐种子波动及 Balanced Accuracy 下降见 [训练策略研究](docs/research-plan/training-strategy-study.md)。
+
+后续[逐岩性诊断](docs/research-plan/strategy-class-impact.md)显示 Augen_gneiss 与 Amphibolittic_gneiss 的召回在所有五种子中退化，因此该配置仍是研究候选，默认基线保持原策略。运行 `analyze_strategy_impact.py --output-dir <新目录>` 可复现两配置的配对混淆矩阵与类别指标。
+
+training-strategies-v2（init --strategy-actions --class-guard）的 Agent 会话增加逐类别召回屏障：任一类别相对基线下降超过 0.05 即拒绝候选。类别权重配置在该屏障下被拒绝，详情见策略影响报告；旧会话结果不被回写。
+
+中点采样的 v3 目录使用 `init --strategy-actions --class-guard --midpoint-actions`。另完成了[真实样本重复采样对照](docs/research-plan/real-resampling-control.md)：同类别数量下替代 SMOTE 未通过整体及类别约束，因此仅保留 benchmark 动作原语，不加入 Agent 目录。当前默认基线仍为 paper_smote。
+
+已补齐[证据驱动的停止流程](docs/research-plan/evidence-stop.md)：回放三个已知候选后，宿主提交 stop，保留基线及未使用预算。`replay_agent_evidence.py` 不训练模型，不能将回放结果当成新的搜索效率证据。
+
+已完成[独立宿主上下文决策对照](docs/research-plan/decision-benchmark.md)：八候选、三个评估预算，实际模型依次提出 original 和 class_weight；均被约束拦截。与固定顺序和42种随机顺序全部持平。入口为 `run_decision_benchmark.py` 的 prepare/observe/act/compare，未选结果仅对宿主隐藏，执行器仍负责校验完整表。
+
+已加入 `run_feedback_ablation.py` 并完成[首对类别反馈消融轨迹](docs/research-plan/feedback-ablation.md)。两组动作顺序不同但最终分数相同，当前只验证反馈遮蔽与逐轮宿主决策，不支持因果或性能优势结论。
 
 ## 当前复现对象
 

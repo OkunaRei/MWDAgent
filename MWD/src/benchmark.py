@@ -14,7 +14,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from src.contract import feature_columns
 from src.evaluate import classification_metrics, slice_classification_metrics
-from src.sampling import rebalance_training_set
+from src.sampling import rebalance_training_set, undersample_majority_then_smote, rebalance_real_samples
 
 
 SEED_LIST = (11, 19, 42, 73, 101)
@@ -185,16 +185,31 @@ def run_validation_once(
     seed: int,
     selection_weights: tuple[float, float, float] = (0.2, 0.5, 0.3),
     feature_group: str = "all_48",
+    training_strategy: str = "paper_smote",
+    include_diagnostics: bool = False,
 ) -> dict[str, Any]:
     """Train and evaluate one model using only a split of the public train file."""
+    valid_strategies = {"paper_smote", "original", "class_weight", "midpoint_smote", "real_resample"}
+    if training_strategy not in valid_strategies:
+        raise ValueError(f"Unsupported training strategy: {training_strategy}")
     train, validation = split_train_validation(train_frame, validation_size=validation_size, seed=seed)
     columns = feature_group_columns(train, feature_group)
     y_train, y_validation, encoder = _encode_labels(train, validation)
-    balanced_features, balanced_labels = rebalance_training_set(
-        train[columns], y_train, random_state=seed
-    )
+    original_counts = {str(label): int(count) for label, count in train["Rock"].value_counts().items()}
+    if training_strategy == "paper_smote":
+        fitted_features, fitted_labels = rebalance_training_set(train[columns], y_train, random_state=seed)
+    elif training_strategy == "midpoint_smote":
+        fitted_features, fitted_labels = undersample_majority_then_smote(
+            train[columns], y_train, random_state=seed
+        )
+    elif training_strategy == "real_resample":
+        fitted_features, fitted_labels = rebalance_real_samples(train[columns], y_train, random_state=seed)
+    else:
+        fitted_features, fitted_labels = train[columns].copy(deep=True), y_train.copy(deep=True)
     model = _make_model(model_name, seed)
-    model.fit(balanced_features, balanced_labels)
+    if training_strategy == "class_weight":
+        model.set_params(class_weight="balanced")
+    model.fit(fitted_features, fitted_labels)
     predictions = model.predict(validation[columns]).astype(int)
     probabilities = model.predict_proba(validation[columns])
     classes = list(encoder.classes_)
@@ -213,7 +228,13 @@ def run_validation_once(
         "validation_size": validation_size,
         "train_rows": len(train),
         "validation_rows": len(validation),
-        "balanced_train_rows": len(balanced_features),
+        "balanced_train_rows": len(fitted_features),
+        "training_strategy": training_strategy,
+        "original_train_class_counts": original_counts,
+        "fitted_train_class_counts": {
+            str(encoder.classes_[int(label)]): int(count)
+            for label, count in pd.Series(fitted_labels).value_counts().items()
+        },
         "feature_count": len(columns),
         "validation": _flat_metrics(overall),
         "ordinary": {"support": slices["ordinary"]["support"], **_flat_metrics(slices["ordinary"])},
@@ -230,6 +251,12 @@ def run_validation_once(
         macro_f1_weight=selection_weights[1],
         transition_macro_f1_weight=selection_weights[2],
     )
+    if include_diagnostics:
+        result = {**result, 'diagnostics': {
+            'classes': classes, 'validation_indices': validation.index.tolist(),
+            'overall': overall, 'ordinary': slices['ordinary'],
+            'transition_zone': slices['transition_zone'],
+        }}
     return result
 
 

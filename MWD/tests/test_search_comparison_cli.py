@@ -4,12 +4,12 @@ import sys
 
 import pytest
 
-from src.agent_loop import BASELINE, observation_digest
+from src.agent_loop import BASELINE, POLICY, observation_digest
 
 
 def session_states():
     first = {'revision': 0, 'status': 'active', 'budget': 4, 'incumbent': BASELINE,
-             'source_sha256': 'a' * 64, 'policy': {}, 'actions': [],
+             'source_sha256': 'a' * 64, 'policy': deepcopy(POLICY), 'actions': [],
              'evaluations': [{'candidate': BASELINE, 'summary': {}, 'accepted': True,
                               'reason': 'baseline', 'status': 'completed'}]}
     second = {**deepcopy(first), 'revision': 1,
